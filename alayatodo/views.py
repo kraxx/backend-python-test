@@ -74,6 +74,15 @@ def todos_POST():
         g.db.commit()
     return redirect('/todo')
 
+@app.route('/todo/complete/<id>', methods=['POST'])
+def todo_complete(id):
+    completed = True if request.args.get("completed") == "1" else False
+    g.db.execute(
+        "UPDATE todos SET completed='%s' WHERE id='%s'"
+        % (0 if completed else 1, id)
+    )
+    g.db.commit()
+    return redirect('/todo')
 
 @app.route('/todo/<id>', methods=['POST'])
 def todo_delete(id):
