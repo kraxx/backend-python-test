@@ -28,8 +28,8 @@ def login() -> Response:
 def login_post() -> Response:
     username = request.form.get('username')
     password = request.form.get('password')
-    user = User.query.filter_by(username=username, password=password).first()
-    if user:
+    user = User.query.filter_by(username=username).first()
+    if user and user.verify(password):
         session['logged_in'] = True
         session['page'] = 1
         session['user'] = {
@@ -45,6 +45,7 @@ def login_post() -> Response:
 @app.route('/logout')
 def logout() -> Response:
     session.pop('logged_in', None)
+    session.pop('page', None)
     session.pop('user', None)
     flash('See you space cowboy', 'success')
     return redirect('/')
@@ -52,6 +53,8 @@ def logout() -> Response:
 
 @app.route('/todo/task/<int:id>', methods=['GET'])
 def todo(id: int) -> Response:
+    if not session.get('logged_in'):
+        return redirect('/login')
     todo = db.session.query(Todo).filter_by(id=id).first()
     return render_template('todo.html', todo=todo)
 
@@ -88,6 +91,8 @@ def todos_post() -> Response:
 
 @app.route('/todo/complete/<int:id>', methods=['POST'])
 def todo_toggle_completion(id: int) -> Response:
+    if not session.get('logged_in'):
+        return redirect('/login')
     todo = db.session.query(Todo).filter_by(id=id).first()
     todo.completed = not todo.completed
     db.session.commit()
@@ -113,5 +118,7 @@ def todo_json(id: int) -> str:
 
 @app.route('/page/<int:page>', methods=['GET'])
 def change_page(page: int) -> Response:
+    if not session.get('logged_in'):
+        return redirect('/login')
     session['page'] = page
     return redirect('/todo/%s' % session['page'])
