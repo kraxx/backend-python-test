@@ -26,13 +26,11 @@ def _run_sql(filename):
 
 if __name__ == '__main__':
     args = docopt(__doc__)
-    initdb = args.get('initdb')
-    migratedb = args.get('migratedb')
-    if initdb:
+    if args.get('initdb'):
         _run_sql('resources/database.sql')
         _run_sql('resources/fixtures.sql')
         print("AlayaTodo: Database initialized.")
-    elif migratedb:
+    elif args.get('migratedb'):
         _run_sql('resources/migrate.sql')
         print("AlayaTodo: Database migration applied.")
     else:

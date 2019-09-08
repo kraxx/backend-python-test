@@ -1,12 +1,12 @@
 from alayatodo import app
 from flask import (
     g,
+    jsonify,
     redirect,
     render_template,
     request,
     session
     )
-
 
 @app.route('/')
 def home():
@@ -74,6 +74,7 @@ def todos_POST():
         g.db.commit()
     return redirect('/todo')
 
+
 @app.route('/todo/complete/<id>', methods=['POST'])
 def todo_complete(id):
     completed = True if request.args.get("completed") == "1" else False
@@ -84,6 +85,7 @@ def todo_complete(id):
     g.db.commit()
     return redirect('/todo')
 
+
 @app.route('/todo/<id>', methods=['POST'])
 def todo_delete(id):
     if not session.get('logged_in'):
@@ -91,3 +93,21 @@ def todo_delete(id):
     g.db.execute("DELETE FROM todos WHERE id ='%s'" % id)
     g.db.commit()
     return redirect('/todo')
+
+
+@app.route('/todo/<id>/json', methods=['GET'])
+def todo_json(id):
+    row = g.db.execute(
+        "SELECT * FROM todos WHERE id='%s'" % id,
+    )
+    return jsonify(row_to_dict(row))
+
+
+def row_to_dict(row):
+    ret = {}
+    for r in row.fetchall():
+        ret['id'] = r[0]
+        ret['user_id'] = r[1]
+        ret['description'] = r[2]
+        ret['completed'] = r[3]
+    return ret
