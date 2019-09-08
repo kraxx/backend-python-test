@@ -30,12 +30,13 @@ def login_post() -> Response:
     password = request.form.get('password')
     user = User.query.filter_by(username=username, password=password).first()
     if user:
+        session['logged_in'] = True
+        session['page'] = 1
         session['user'] = {
             'id': user.id,
             'username': user.username
         }
-        session['logged_in'] = True
-        return redirect('/todo')
+        return redirect('/todo/%s' % session['page'])
     else:
         flash('Nice try buddy', 'danger')
         return redirect('/login')
@@ -49,18 +50,22 @@ def logout() -> Response:
     return redirect('/')
 
 
-@app.route('/todo/<id>', methods=['GET'])
-def todo(id: str) -> Response:
+@app.route('/todo/task/<int:id>', methods=['GET'])
+def todo(id: int) -> Response:
     todo = db.session.query(Todo).filter_by(id=id).first()
     return render_template('todo.html', todo=todo)
 
 
-@app.route('/todo', methods=['GET'])
-@app.route('/todo/', methods=['GET'])
-def todos() -> Response:
+@app.route('/todo/<int:page>', methods=['GET'])
+def todos(page: int = 1) -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
-    todos = Todo.query.all()
+    session['page'] = page
+    todos = Todo.query.paginate(
+        page=session['page'],
+        per_page=5,
+        error_out=False
+    )
     return render_template('todos.html', todos=todos)
 
 
@@ -78,29 +83,35 @@ def todos_post() -> Response:
         flash('Time to hustle!', 'success')
     else:
         flash('Not exactly worthwhile to add nothing, is it?', 'warning')
-    return redirect('/todo')
+    return redirect('/todo/%s' % session['page'])
 
 
-@app.route('/todo/complete/<id>', methods=['POST'])
-def todo_toggle_completion(id: str) -> Response:
+@app.route('/todo/complete/<int:id>', methods=['POST'])
+def todo_toggle_completion(id: int) -> Response:
     todo = db.session.query(Todo).filter_by(id=id).first()
     todo.completed = not todo.completed
     db.session.commit()
-    return redirect('/todo')
+    return redirect('/todo/%s' % session['page'])
 
 
-@app.route('/todo/<id>', methods=['POST'])
-def todo_delete(id: str):
+@app.route('/todo/<int:id>', methods=['POST'])
+def todo_delete(id: int) -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
     todo = Todo.query.filter_by(id=id).first()
     db.session.delete(todo)
     db.session.commit()
     flash("Task #%s chucked into the void!" % id, 'success')
-    return redirect('/todo')
+    return redirect('/todo/%s' % session['page'])
 
 
-@app.route('/todo/<id>/json', methods=['GET'])
-def todo_json(id: str):
+@app.route('/todo/<int:id>/json', methods=['GET'])
+def todo_json(id: int) -> str:
     todo = Todo.query.filter_by(id=id).first()
     return jsonify(todo.to_dict())
+
+
+@app.route('/page/<int:page>', methods=['GET'])
+def change_page(page: int) -> Response:
+    session['page'] = page
+    return redirect('/todo/%s' % session['page'])
