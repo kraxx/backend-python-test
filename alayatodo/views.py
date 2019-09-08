@@ -1,6 +1,5 @@
 from flask import (
     flash,
-    jsonify,
     redirect,
     render_template,
     request,
@@ -8,7 +7,7 @@ from flask import (
     Response
 )
 
-from alayatodo import app, db
+from alayatodo import app
 from .models import User, Todo
 
 
@@ -28,7 +27,7 @@ def login() -> Response:
 def login_post() -> Response:
     username = request.form.get('username')
     password = request.form.get('password')
-    user = User.query.filter_by(username=username).first()
+    user = User.get(username)
     if user and user.verify(password):
         session['logged_in'] = True
         session['page'] = 1
@@ -55,7 +54,7 @@ def logout() -> Response:
 def todo(id: int) -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
-    todo = db.session.query(Todo).filter_by(id=id).first()
+    todo = Todo.get(id)
     return render_template('todo.html', todo=todo)
 
 
@@ -64,11 +63,7 @@ def todos(page: int = 1) -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
     session['page'] = page
-    todos = Todo.query.paginate(
-        page=session['page'],
-        per_page=5,
-        error_out=False
-    )
+    todos = Todo.paginate(page)
     return render_template('todos.html', todos=todos)
 
 
@@ -80,9 +75,7 @@ def todos_post() -> Response:
     user_id = session['user']['id']
     description = request.form.get('description')
     if description:
-        todo = Todo(user_id, description)
-        db.session.add(todo)
-        db.session.commit()
+        Todo.add(user_id, description)
         flash('Time to hustle!', 'success')
     else:
         flash('Not exactly worthwhile to add nothing, is it?', 'warning')
@@ -93,9 +86,7 @@ def todos_post() -> Response:
 def todo_toggle_completion(id: int) -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
-    todo = db.session.query(Todo).filter_by(id=id).first()
-    todo.completed = not todo.completed
-    db.session.commit()
+    Todo.toggle_completion(id)
     return redirect('/todo/%s' % session['page'])
 
 
@@ -103,17 +94,14 @@ def todo_toggle_completion(id: int) -> Response:
 def todo_delete(id: int) -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
-    todo = Todo.query.filter_by(id=id).first()
-    db.session.delete(todo)
-    db.session.commit()
+    Todo.delete(id)
     flash("Task #%s chucked into the void!" % id, 'success')
     return redirect('/todo/%s' % session['page'])
 
 
 @app.route('/todo/<int:id>/json', methods=['GET'])
 def todo_json(id: int) -> str:
-    todo = Todo.query.filter_by(id=id).first()
-    return jsonify(todo.to_dict())
+    return Todo.get(id).json()
 
 
 @app.route('/page/<int:page>', methods=['GET'])
