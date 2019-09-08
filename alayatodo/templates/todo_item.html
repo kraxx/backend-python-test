@@ -1,0 +1,32 @@
+<tr>
+    <td>{{ todo.id }}</td>
+    <td>{{ todo.user_id }}</td>
+    <td>
+        {% if anchor %}
+            <a href="{{ url_for('todo', id=todo.id) }}">
+               {{ todo.description }}
+            </a>
+        {% else %}
+           {{ todo.description }}
+        {% endif %}
+    </td>
+    <td>
+        <a href="{{ url_for('todo_json', id=todo.id) }}">
+           JSON
+        </a>
+    </td>
+    <td>
+        <form method="post" action="{{ url_for('todo_toggle_completion', id=todo.id) }}">
+            <button type="submit" class="btn btn-xs {{'btn-success' if todo.completed else 'btn-warning'}}">
+                <span class="glyphicon glyphicon-ok" />
+            </button>
+        </form>
+    </td>
+    <td>
+        <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
+            <button type="submit" class="btn btn-xs btn-danger">
+                <span class="glyphicon glyphicon-remove glyphicon-white" />
+            </button>
+        </form>
+    </td>
+</tr>

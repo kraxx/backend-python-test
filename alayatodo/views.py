@@ -101,6 +101,8 @@ def todo_delete(id: int) -> Response:
 
 @app.route('/todo/<int:id>/json', methods=['GET'])
 def todo_json(id: int) -> str:
+    if not session.get('logged_in'):
+        return redirect('/login')
     return Todo.get(id).json()
 
 

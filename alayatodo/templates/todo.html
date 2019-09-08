@@ -4,18 +4,8 @@
 <div class="col-md-4 col-md-offset-4">
     <h1>Todo:</h1>
     <table class="table table-striped">
-        <th>#</th><th>User</th><th>Description</th><th></th>
-        <tr>
-            <td>{{ todo.id }}</td>
-            <td>{{ todo.user_id }}</td>
-            <td>{{ todo.description }}</td>
-            <td>
-                <form method="post" action="{{ url_for('todo_delete', id=todo.id) }}">
-                    <button type="submit" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-remove glyphicon-white"></span></button>
-                </form>
-            </td>
-        </tr>
+        <th>#</th><th>User</th><th>Description</th><th>JSON</th><th>Completion</th><th>Delete</th>
+        {% include 'todo_item.html' %}
     </table>
 </div>
-
 {% endblock %}
