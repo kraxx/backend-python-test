@@ -1,118 +1,106 @@
-from alayatodo import app
 from flask import (
     flash,
-    g,
     jsonify,
     redirect,
     render_template,
     request,
-    session
-    )
+    session,
+    Response
+)
+
+from alayatodo import app, db
+from .models import User, Todo
+
 
 @app.route('/')
-def home():
+def home() -> Response:
     with app.open_resource('../README.md', mode='r') as f:
         readme = "".join(l for l in f)
         return render_template('index.html', readme=readme)
 
 
 @app.route('/login', methods=['GET'])
-def login():
+def login() -> Response:
     return render_template('login.html')
 
 
 @app.route('/login', methods=['POST'])
-def login_POST():
+def login_post() -> Response:
     username = request.form.get('username')
     password = request.form.get('password')
-
-    sql = "SELECT * FROM users WHERE username = '%s' AND password = '%s'";
-    cur = g.db.execute(sql % (username, password))
-    user = cur.fetchone()
+    user = User.query.filter_by(username=username, password=password).first()
     if user:
-        session['user'] = dict(user)
+        session['user'] = {
+            'id': user.id,
+            'username': user.username
+        }
         session['logged_in'] = True
         return redirect('/todo')
-
-    return redirect('/login')
+    else:
+        flash('Nice try buddy', 'danger')
+        return redirect('/login')
 
 
 @app.route('/logout')
-def logout():
+def logout() -> Response:
     session.pop('logged_in', None)
     session.pop('user', None)
+    flash('See you space cowboy', 'success')
     return redirect('/')
 
 
 @app.route('/todo/<id>', methods=['GET'])
-def todo(id):
-    cur = g.db.execute("SELECT * FROM todos WHERE id ='%s'" % id)
-    todo = cur.fetchone()
+def todo(id: str) -> Response:
+    todo = db.session.query(Todo).filter_by(id=id).first()
     return render_template('todo.html', todo=todo)
 
 
 @app.route('/todo', methods=['GET'])
 @app.route('/todo/', methods=['GET'])
-def todos():
+def todos() -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
-    cur = g.db.execute("SELECT * FROM todos")
-    todos = cur.fetchall()
+    todos = Todo.query.all()
     return render_template('todos.html', todos=todos)
 
 
 @app.route('/todo', methods=['POST'])
 @app.route('/todo/', methods=['POST'])
-def todos_POST():
+def todos_post() -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
+    user_id = session['user']['id']
     description = request.form.get('description')
     if description:
-        g.db.execute(
-            "INSERT INTO todos (user_id, description) VALUES ('%s', '%s')"
-            % (session['user']['id'], description)
-        )
-        g.db.commit()
-        flash('Added new task!', 'success')
+        todo = Todo(user_id, description)
+        db.session.add(todo)
+        db.session.commit()
+        flash('Time to hustle!', 'success')
     else:
-        flash('Please enter a description', 'warning')
+        flash('Not exactly worthwhile to add nothing, is it?', 'warning')
     return redirect('/todo')
 
 
 @app.route('/todo/complete/<id>', methods=['POST'])
-def todo_complete(id):
-    completed = True if request.args.get("completed") == "1" else False
-    g.db.execute(
-        "UPDATE todos SET completed='%s' WHERE id='%s'"
-        % (0 if completed else 1, id)
-    )
-    g.db.commit()
+def todo_toggle_completion(id: str) -> Response:
+    todo = db.session.query(Todo).filter_by(id=id).first()
+    todo.completed = not todo.completed
+    db.session.commit()
     return redirect('/todo')
 
 
 @app.route('/todo/<id>', methods=['POST'])
-def todo_delete(id):
+def todo_delete(id: str):
     if not session.get('logged_in'):
         return redirect('/login')
-    g.db.execute("DELETE FROM todos WHERE id ='%s'" % id)
-    g.db.commit()
-    flash("Deleted task #'%s'" % id, 'success')
+    todo = Todo.query.filter_by(id=id).first()
+    db.session.delete(todo)
+    db.session.commit()
+    flash("Task #%s chucked into the void!" % id, 'success')
     return redirect('/todo')
 
 
 @app.route('/todo/<id>/json', methods=['GET'])
-def todo_json(id):
-    row = g.db.execute(
-        "SELECT * FROM todos WHERE id='%s'" % id,
-    )
-    return jsonify(row_to_dict(row))
-
-
-def row_to_dict(row):
-    ret = {}
-    for r in row.fetchall():
-        ret['id'] = r[0]
-        ret['user_id'] = r[1]
-        ret['description'] = r[2]
-        ret['completed'] = r[3]
-    return ret
+def todo_json(id: str):
+    todo = Todo.query.filter_by(id=id).first()
+    return jsonify(todo.to_dict())

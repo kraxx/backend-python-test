@@ -20,7 +20,7 @@
                     </a>
                 </td>
                 <td>
-                    <form method="post" action="{{ url_for('todo_complete', id=todo.id, completed=todo.completed) }}">
+                    <form method="post" action="{{ url_for('todo_toggle_completion', id=todo.id) }}">
                         <button type="submit" class="btn btn-xs {{'btn-success' if todo.completed else 'btn-warning'}}">
                             <span class="glyphicon glyphicon-ok" />
                         </button>
@@ -36,7 +36,7 @@
             </tr>
         {% endfor %}
         <tr>
-            <form method="post" action="{{ url_for('todos_POST') }}">
+            <form method="post" action="{{ url_for('todos_post') }}">
                 <td colspan="3">
                     <input type="textbox" name="description" class="small-6 small-center" placeholder="Description...">
                 </td>

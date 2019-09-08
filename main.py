@@ -12,7 +12,7 @@ import os
 from alayatodo import app
 
 
-def _run_sql(filename):
+def _run_sql(filename: str):
     try:
         subprocess.check_output(
             "sqlite3 %s < %s" % (app.config['DATABASE'], filename),
