@@ -12,14 +12,22 @@
     </td>
     <td>
         <a href="{{ url_for('todo_json', id=todo.id) }}">
-           JSON
+            <button class="btn btn-xs btn-light">
+                <span class="glyphicon glyphicon-eye-open"
+            </button>
         </a>
     </td>
     <td>
         <form method="post" action="{{ url_for('todo_toggle_completion', id=todo.id) }}">
-            <button type="submit" class="btn btn-xs {{'btn-success' if todo.completed else 'btn-warning'}}">
-                <span class="glyphicon glyphicon-ok" />
-            </button>
+            {% if todo.completed %}
+                <button type="submit" class="btn btn-xs btn-success">
+                    <span class="glyphicon glyphicon-ok" > NICELY DONE! </span>
+                </button>
+            {% else %}
+                <button type="submit" class="btn btn-xs btn-warning">
+                    <span class="glyphicon glyphicon-hand-up" > INCOMPLETE! </span>
+                </button>
+            {% endif%}
         </form>
     </td>
     <td>

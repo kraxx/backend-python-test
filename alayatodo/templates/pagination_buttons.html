@@ -1,0 +1,26 @@
+<td>
+    {% if todos.has_prev %}
+        <form method="get" action="{{ url_for('change_page', page=todos.prev_num) }}">
+            <button type="submit" class="btn btn-xs btn-info">
+                <span class="glyphicon glyphicon-chevron-left" />
+            </button>
+        </form>
+    {% else %}
+        <button class="btn btn-xs btn-info disabled">
+            <span class="glyphicon glyphicon-chevron-left" />
+        </button>
+    {% endif %}
+</td>
+<td>
+    {% if todos.has_next %}
+        <form method="get" action="{{ url_for('change_page', page=todos.next_num) }}">
+            <button type="submit" class="btn btn-xs btn-info">
+                <span class="glyphicon glyphicon-chevron-right" />
+            </button>
+        </form>
+    {% else %}
+        <button class="btn btn-xs btn-info disabled">
+            <span class="glyphicon glyphicon-chevron-right" />
+        </button>
+    {% endif %}
+</td>
