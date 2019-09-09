@@ -6,14 +6,12 @@ COPY resources          ./resources
 COPY main.py            ./main.py
 COPY README.md          ./README.md
 COPY requirements.txt   ./requirements.txt
+COPY setup.sh           ./setup.sh
 
 # Create virtualenv and initialize sqlite db
 RUN apk add sqlite
 RUN pip install virtualenv
-RUN virtualenv -p python3.7 venv
-RUN venv/bin/pip install -r requirements.txt
-RUN venv/bin/python main.py initdb
-RUN venv/bin/python main.py migratedb
+RUN ./setup.sh
 
 # So we can access the docker instance's app from host machine
 EXPOSE 5000/tcp
@@ -22,4 +20,4 @@ EXPOSE 5000/tcp
 VOLUME ["/tmp/alayatodo.db"]
 
 # Run app
-CMD ["venv/bin/python", "main.py"]
+CMD ["./run.sh"]

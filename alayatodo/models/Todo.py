@@ -47,7 +47,7 @@ class Todo(db.Model):
         """
         return cls.query.paginate(
             page=page,
-            per_page=app.config.get('PAGE_COUNT', 5),
+            per_page=app.config.get('PAGE_ITEM_LIMIT', 5),
             error_out=False
         )
 
