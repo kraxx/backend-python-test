@@ -38,14 +38,15 @@ class Todo(db.Model):
         db.session.commit()
 
     @classmethod
-    def paginate(cls, page: int) -> Pagination:
+    def paginate(cls, user_id: int, page: int) -> Pagination:
         """
         Uses SQLAlchemy's builtin pagination tools to return paginated queries
 
+        :param user_id: specifies the user who's tasks are to be gotten
         :param page: target page number
         :return: flask_sqlalchemy.Pagination object for use in views
         """
-        return cls.query.paginate(
+        return cls.query.filter_by(user_id=user_id).paginate(
             page=page,
             per_page=app.config.get('PAGE_ITEM_LIMIT', 5),
             error_out=False

@@ -69,9 +69,8 @@ def todo(id: int) -> Response:
 def todos(page: int = None) -> Response:
     if not session.get('logged_in'):
         return redirect('/login')
-    session['page'] = page
     try:
-        todos = Todo.paginate(page)
+        todos = Todo.paginate(session['user']['id'], session['page'])
         return render_template('todos.html', todos=todos)
     except Exception as e:
         flash('Error paginating todos: %e' % e)
