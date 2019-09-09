@@ -11,9 +11,9 @@ my docker-machine's VirtualBox driver.
 
 In any case, this should all work perfectly fine on a machine running a UNIX-like OS.
 
-I initially misread the requirements being python 3.7, so I adjusted the previously
-python2 code to work for python3. But hey, it's 2019 so why not use python3 over the
-soon-to-be deprecated python2?
+I initially misread the requirements being python 3.7 (to be fair, the README specifies 5.7),
+so I adjusted the previously python2 code to work for python3.
+But hey, it's 2019 so why not use python3 over the soon-to-be deprecated python2?
 
 #### Requirements
 * python 3.7
