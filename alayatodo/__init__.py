@@ -5,6 +5,7 @@ from os import getenv
 # configuration
 DATABASE = getenv('ALAYATODO_DATABASE', '/tmp/alayatodo.db')
 SQLALCHEMY_DATABASE_URI = getenv('ALAYATODO_SQLALCHEMY_DATABASE_URI', 'sqlite:///' + DATABASE)
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 DEBUG = getenv('ALAYATODO_DEBUG', True)
 
 PAGE_ITEM_LIMIT = getenv('ALAYATODO_PAGE_ITEM_LIMIT', 8)
