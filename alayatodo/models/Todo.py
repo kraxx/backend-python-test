@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_sqlalchemy import Pagination
 
-from alayatodo import db
+from alayatodo import app, db
 
 
 class Todo(db.Model):
@@ -47,7 +47,7 @@ class Todo(db.Model):
         """
         return cls.query.paginate(
             page=page,
-            per_page=5,
+            per_page=app.config.get('PAGE_COUNT', 5),
             error_out=False
         )
 
