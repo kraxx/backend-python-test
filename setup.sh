@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Run this script to setup dependencies, and to initialize/apply migrations to the database
+
 # Install virtualenv if it doesn't exist
 if [ $(pip list | grep virtualenv | wc -l) -eq 0 ]
 then

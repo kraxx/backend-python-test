@@ -6,6 +6,7 @@ COPY resources          ./resources
 COPY main.py            ./main.py
 COPY README.md          ./README.md
 COPY requirements.txt   ./requirements.txt
+COPY run.sh             ./run.sh
 COPY setup.sh           ./setup.sh
 
 # Create virtualenv and initialize sqlite db
@@ -17,7 +18,9 @@ RUN ./setup.sh
 EXPOSE 5000/tcp
 
 # Persist database to host machine
-VOLUME ["/tmp/alayatodo.db"]
+# Conflicts with existing directories/files on WINDOWS.
+# Disabled as it's not too important to persist this data, really.
+#VOLUME ["/tmp/alayatodo.db"]
 
 # Run app
 CMD ["./run.sh"]
