@@ -40,7 +40,7 @@ def login_post() -> Response:
         else:
             flash('Nice try buddy', 'danger')
     except Exception as e:
-        flash('Error getting user for %s: %s' % (username, e))
+        flash('Error getting user for %s: %s' % (username, e), 'danger')
     return redirect('/login')
 
 
@@ -61,7 +61,7 @@ def todo(id: int) -> Response:
         todo = Todo.get(id)
         return render_template('todo.html', todo=todo)
     except Exception as e:
-        flash('Error getting todo task #%s: %s' % (id, e))
+        flash('Error getting todo task #%s: %s' % (id, e), 'danger')
         return redirect('/todos/%s' % session['page'])
 
 
@@ -73,7 +73,7 @@ def todos(page: int = None) -> Response:
         todos = Todo.paginate(session['user']['id'], session['page'])
         return render_template('todos.html', todos=todos)
     except Exception as e:
-        flash('Error paginating todos: %e' % e)
+        flash('Error paginating todos: %e' % e, 'danger')
         return redirect('/')
 
 
@@ -89,7 +89,7 @@ def todos_post() -> Response:
             Todo.add(user_id, description)
             flash('Time to hustle!', 'success')
         except Exception as e:
-            flash('Error adding task: %e' % e)
+            flash('Error adding task: %e' % e, 'danger')
     else:
         flash('Not exactly worthwhile to add nothing, is it?', 'warning')
     return redirect('/todo/%s' % session['page'])
@@ -102,7 +102,7 @@ def todo_toggle_completion(id: int) -> Response:
     try:
         Todo.toggle_completion(id)
     except Exception as e:
-        flash('Error toggling completion for task #%s: %s' % (id, e))
+        flash('Error toggling completion for task #%s: %s' % (id, e), 'danger')
     return redirect('/todo/%s' % session['page'])
 
 
